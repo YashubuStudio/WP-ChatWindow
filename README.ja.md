@@ -1,6 +1,6 @@
 # ChatBotWindow プラグイン
 
-WordPress に React 製のチャットボットを組み込むプラグインです。UI には **Material UI** を使用し、外部 API との通信は WordPress の REST API を経由します。API URL と API キーはダッシュボードから設定可能です。
+WordPress に React 製のチャットボットを組み込むプラグインです。UI には **Material UI** を使用し、外部 API との通信は WordPress の REST API を経由します。API URL と API キー、そして送信ヘッダー名はダッシュボードから設定可能です。
 
 ## 開発手順
 
@@ -21,7 +21,8 @@ WordPress に React 製のチャットボットを組み込むプラグインで
 ## WordPress への導入
 
 1. 上記手順で作成した zip ファイルを WordPress のプラグイン画面からアップロードして有効化します。
-2. **設定 > ChatBotWindow** から API URL と API キーを保存します。
+2. **設定 > ChatBotWindow** から API URL と API キー、ヘッダー名を保存します。
+3. チャットボットを表示したいページに `[chatbot_window]` ショートコードを配置します。
 
 ## ディレクトリ構成
 
