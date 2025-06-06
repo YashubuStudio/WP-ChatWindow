@@ -1,0 +1,107 @@
+### WPプラグイン設計案（ReactベースChatBot）
+
+#### 基本構成
+
+* **WordPress側**:
+
+  * プラグインとして独立
+  * 管理画面でのURL・APIキー設定
+  * Reactフロントエンドとの通信
+
+* **フロントエンド（React）**:
+
+  * ChatウィンドウUI
+  * APIリクエスト処理
+  * 出力内容の選定・整形処理
+
+#### 機能詳細
+
+1. **管理画面（WordPressプラグイン設定ページ）**:
+
+   * API URL設定（非公開）
+   * APIキーの保存（WordPress DBに安全に格納）
+   * 暗号化・難読化による漏洩防止
+
+2. **フロントエンド（React）**:
+
+   * Chatウィンドウ表示（質問入力・回答表示）
+   * 入力質問のバリデーション・フィルタリング
+   * APIに非同期リクエスト送信（WP経由）
+   * APIから返されたデータの選定・整形・表示
+   * 1問1答の単純表示（在庫確認などの定型質問）と、一般的な質問の2パターン処理
+
+#### API通信フロー
+
+```
+User（質問入力）
+  ↓
+React フロントエンド（WP経由でAPI呼び出し）
+  ↓
+WordPress プラグイン（APIキー付与・URL隠蔽）
+  ↓
+外部API（LLMサーバー）
+  ↓
+WordPress プラグイン（API結果返却）
+  ↓
+Reactフロントエンド（内容整形・表示）
+```
+
+#### セキュリティ設計
+
+* API URLおよびAPIキーはWP側で管理し、フロントエンドに直接公開しない
+* WP REST API経由でURL・キーを暗号化してやり取り
+* HTTPSによる通信暗号化
+
+#### 汎用性確保の設計指針
+
+* APIレスポンス形式を規定し、それに従ってReact側で柔軟に整形可能
+* コードベースで整形ルールや回答条件を簡単に変更できるよう設計（Reactのstate管理を利用）
+
+#### APIのレスポンス処理（React例）
+
+```javascript
+fetch('/wp-json/chatbot/v1/query', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ query: userQuery })
+})
+.then(res => res.json())
+.then(data => {
+  const answer = data['自然言語の回答'] || 'すみません。よくわかりません';
+  setResponse(answer);
+})
+.catch(() => setResponse('通信エラーが発生しました'));
+```
+
+#### WP REST APIの実装例（PHP）
+
+```php
+add_action('rest_api_init', function () {
+  register_rest_route('chatbot/v1', '/query', [
+    'methods' => 'POST',
+    'callback' => 'chatbot_query_handler',
+  ]);
+});
+
+function chatbot_query_handler($request) {
+  $settings = get_option('chatbot_settings');
+  $api_url = $settings['api_url'];
+  $api_key = $settings['api_key'];
+
+  $response = wp_remote_post($api_url, [
+    'headers' => [
+      'Content-Type' => 'application/json',
+      'X-API-KEY' => $api_key,
+    ],
+    'body' => json_encode(['query' => $request->get_json_params()['query']])
+  ]);
+
+  if (is_wp_error($response)) {
+    return new WP_REST_Response(['error' => 'APIリクエストに失敗しました'], 500);
+  }
+
+  return json_decode(wp_remote_retrieve_body($response), true);
+}
+```
+
+この設計により、安全性・拡張性・汎用性を持ったWordPressのChatBotプラグインを実現します。
