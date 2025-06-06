@@ -1,6 +1,6 @@
 # ChatBotWindow Plugin
 
-This project provides a WordPress plugin that embeds a React based ChatBot window. The React app uses **Material UI** and communicates with an external API via a WordPress REST endpoint. Settings such as the API URL and key can be configured from the WordPress dashboard.
+This project provides a WordPress plugin that embeds a React based ChatBot window. The React app uses **Material UI** and communicates with an external API via a WordPress REST endpoint. Settings such as the API URL, key and header name can be configured from the WordPress dashboard.
 
 ## Development
 
@@ -23,7 +23,8 @@ The build script automatically places the necessary files into `ChatBotWindow/as
 1. Build the React application as described above.
 2. Create a zip file of the `ChatBotWindow` directory.
 3. Upload the zip file from the WordPress plugin screen and activate the plugin.
-4. Configure the API URL and API key in **Settings > ChatBotWindow**.
+4. Configure the API URL, API key and header name in **Settings > ChatBotWindow**.
+5. Add the `[chatbot_window]` shortcode to a page where you want the chat interface.
 
 ## Repository Structure
 
