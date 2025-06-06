@@ -9,6 +9,7 @@ if (!defined('ABSPATH')) exit;
 
 function cbw_register_settings() {
     register_setting('cbw_options', 'cbw_settings');
+    register_setting('cbw_options', 'cbw_tasks', 'cbw_sanitize_tasks');
 }
 add_action('admin_init', 'cbw_register_settings');
 
@@ -19,6 +20,7 @@ add_action('admin_menu', 'cbw_add_admin_menu');
 
 function cbw_options_page() {
     $settings = get_option('cbw_settings');
+    $tasks    = get_option('cbw_tasks', []);
     ?>
     <div class="wrap">
         <h1>ChatBotWindow Settings</h1>
@@ -30,8 +32,45 @@ function cbw_options_page() {
                 <tr><th scope="row"><label for="cbw_api_key">API Key</label></th>
                     <td><input type="text" id="cbw_api_key" name="cbw_settings[api_key]" value="<?php echo esc_attr($settings['api_key'] ?? ''); ?>" class="regular-text" /></td></tr>
             </table>
+
+            <h2>Tasks</h2>
+            <table class="form-table" id="cbw-tasks-table">
+                <tr>
+                    <th>Task Name</th>
+                    <th>HTML</th>
+                </tr>
+                <?php foreach ($tasks as $slug => $task) : ?>
+                <tr>
+                    <td><input type="text" name="cbw_tasks[<?php echo esc_attr($slug); ?>][name]" value="<?php echo esc_attr($task['name']); ?>" class="regular-text" /></td>
+                    <td><textarea name="cbw_tasks[<?php echo esc_attr($slug); ?>][html]" rows="3" class="large-text code"><?php echo esc_textarea($task['html']); ?></textarea></td>
+                </tr>
+                <?php endforeach; ?>
+                <tr class="cbw-empty-row">
+                    <td><input type="text" name="cbw_tasks[new][name]" class="regular-text" /></td>
+                    <td><textarea name="cbw_tasks[new][html]" rows="3" class="large-text code"><div class="cbw-row">
+  <div class="cbw-col">Column 1</div>
+  <div class="cbw-col">Column 2</div>
+</div></textarea></td>
+                </tr>
+            </table>
+            <p><button type="button" class="button" id="cbw-add-task">Add Task</button></p>
             <?php submit_button(); ?>
         </form>
+        <?php if (!empty($tasks)) : ?>
+        <h2>Shortcodes</h2>
+        <p>
+            <?php foreach ($tasks as $slug => $task) : ?>
+                <code>[cbw_task id="<?php echo esc_html($slug); ?>"]</code><br />
+            <?php endforeach; ?>
+        </p>
+        <?php endif; ?>
+        <script>
+        document.getElementById('cbw-add-task').addEventListener('click', function(){
+            const table = document.getElementById('cbw-tasks-table');
+            const clone = table.querySelector('.cbw-empty-row').cloneNode(true);
+            table.appendChild(clone);
+        });
+        </script>
     </div>
     <?php
 }
@@ -69,4 +108,29 @@ function cbw_query_handler($request) {
 
     return json_decode(wp_remote_retrieve_body($response), true);
 }
+
+function cbw_sanitize_tasks($tasks) {
+    $sanitized = [];
+    if (!is_array($tasks)) return $sanitized;
+    foreach ($tasks as $task) {
+        if (empty($task['name'])) continue;
+        $slug = sanitize_title($task['name']);
+        $html = isset($task['html']) ? wp_kses_post($task['html']) : '';
+        $sanitized[$slug] = [
+            'name' => sanitize_text_field($task['name']),
+            'html' => $html,
+        ];
+    }
+    return $sanitized;
+}
+
+function cbw_task_shortcode($atts) {
+    $atts = shortcode_atts(['id' => ''], $atts);
+    $tasks = get_option('cbw_tasks', []);
+    if ($atts['id'] && isset($tasks[$atts['id']])) {
+        return $tasks[$atts['id']]['html'];
+    }
+    return '';
+}
+add_shortcode('cbw_task', 'cbw_task_shortcode');
 
