@@ -2,7 +2,8 @@ const fs = require('fs');
 const path = require('path');
 
 const buildDir = path.join(__dirname, '..', 'build');
-const targetDir = path.join(__dirname, '..', 'react-db-plugin', 'assets');
+// Copy files into the plugin's assets directory
+const targetDir = path.join(__dirname, '..', 'ChatBotWindow', 'assets');
 
 if (!fs.existsSync(targetDir)) {
   fs.mkdirSync(targetDir, { recursive: true });

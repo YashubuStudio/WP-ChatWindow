@@ -16,7 +16,7 @@ WordPress に React 製のチャットボットを組み込むプラグインで
    ```bash
    npm run build
    ```
-4. 作成された `build` フォルダを `ChatBotWindow/assets` にコピーし、`ChatBotWindow` フォルダを zip 圧縮して WordPress にアップロードします。
+4. ビルドスクリプトにより `ChatBotWindow/assets` へ自動的にファイルが配置されます。完了したら `ChatBotWindow` フォルダを zip 圧縮して WordPress にアップロードします。
 
 ## WordPress への導入
 

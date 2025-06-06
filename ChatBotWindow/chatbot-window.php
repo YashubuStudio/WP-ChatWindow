@@ -38,9 +38,8 @@ function cbw_options_page() {
 
 function cbw_register_assets() {
     $asset_url = plugin_dir_url(__FILE__) . 'assets/';
-    wp_enqueue_style('cbw-style', $asset_url . 'static/css/main.css');
-    wp_enqueue_script('cbw-runtime', $asset_url . 'static/js/runtime-main.js', [], null, true);
-    wp_enqueue_script('cbw-main', $asset_url . 'static/js/main.js', ['cbw-runtime'], null, true);
+    wp_enqueue_style('cbw-style', $asset_url . 'app.css');
+    wp_enqueue_script('cbw-main', $asset_url . 'app.js', [], null, true);
 }
 add_action('wp_enqueue_scripts', 'cbw_register_assets');
 
