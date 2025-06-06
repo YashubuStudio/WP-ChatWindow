@@ -16,8 +16,7 @@ To create the production build that will be packaged with the plugin:
 ```bash
 npm run build
 ```
-
-Copy the generated `build` directory to `ChatBotWindow/assets` and create a zip archive of the `ChatBotWindow` folder for uploading to WordPress.
+The build script automatically places the necessary files into `ChatBotWindow/assets`. Create a zip archive of the `ChatBotWindow` folder for uploading to WordPress.
 
 ## WordPress Installation
 
